@@ -197,6 +197,33 @@ async function test_wrong_answers_keep_box_1() {
   await page.context().close();
 }
 
+async function test_home_due_count_includes_today_mistakes() {
+  const name = 'Home : "À réviser" reflète les fautes du jour, et la séance suivante les reprend';
+  const { page, errors } = await freshPage();
+  try {
+    await page.click('.home-cta');
+    await page.waitForSelector('.question-card');
+    const wrongPrompts = await playSession(page, 'all-wrong');
+    await page.click('.recap-actions .btn-ghost');
+    await page.waitForSelector('.home-cta');
+
+    const dueText = (await page.textContent('.stat-card:nth-child(1) .value')).trim();
+    assertEq(parseInt(dueText, 10), wrongPrompts.length, '"À réviser" doit compter les fautes du jour');
+
+    await page.click('.home-cta');
+    await page.waitForSelector('.question-card');
+    const session2 = await playSession(page, 'all-correct');
+    const repeated = session2.filter((p) => wrongPrompts.includes(p));
+    assert(
+      repeated.length === wrongPrompts.length,
+      `la séance suivante devrait reprendre les ${wrongPrompts.length} cartes ratées, vu ${repeated.length}`,
+    );
+    assert(errors.length === 0, `JS errors: ${errors.join(' / ')}`);
+    ok(name);
+  } catch (e) { fail(name, e.message); }
+  await page.context().close();
+}
+
 async function test_correct_fast_promotes_to_box_2() {
   const name = 'Bonne réponse rapide → boîte 2, nextDue = demain';
   const { page, errors } = await freshPage();
@@ -479,6 +506,7 @@ const tests = [
   test_first_session_5_questions,
   test_no_repeat_same_day,
   test_wrong_answers_keep_box_1,
+  test_home_due_count_includes_today_mistakes,
   test_correct_fast_promotes_to_box_2,
   test_recap_score,
   test_home_progress_after_correct_session,

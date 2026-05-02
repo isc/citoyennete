@@ -1,6 +1,6 @@
 import type { UserProfile } from '../types';
 import { CATEGORY_LABELS, QUESTIONS, type Category } from '../lib/questions';
-import { isDue } from '../lib/leitner';
+import { needsReview } from '../lib/leitner';
 import { todayISO } from '../lib/utils';
 
 interface Props {
@@ -11,9 +11,7 @@ interface Props {
 
 export function HomeScreen({ profile, onStart, onReset }: Props) {
   const today = todayISO();
-  const dueCount = profile.cards.filter(
-    (c) => c.introduced && c.lastSeen !== today && isDue(c, today),
-  ).length;
+  const dueCount = profile.cards.filter((c) => needsReview(c, today)).length;
   const introducedCount = profile.cards.filter((c) => c.introduced).length;
 
   const categoryStats = computeCategoryStats(profile);

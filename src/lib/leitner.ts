@@ -19,6 +19,19 @@ export function isDue(card: Card, today: string): boolean {
 }
 
 /**
+ * Une carte mérite d'être revue si elle est due et soit pas encore vue
+ * aujourd'hui, soit ratée lors de sa dernière tentative (afin de pouvoir
+ * retravailler une erreur du jour sans attendre demain).
+ */
+export function needsReview(card: Card, today: string): boolean {
+  if (!card.introduced) return false;
+  if (!isDue(card, today)) return false;
+  if (card.lastSeen !== today) return true;
+  const last = card.history[card.history.length - 1];
+  return !!last && !last.correct;
+}
+
+/**
  * - Bonne réponse rapide : promotion (max boîte 5)
  * - Bonne réponse lente : pas de promotion, mais on replanifie sur la boîte courante
  * - Mauvaise réponse : retour boîte 1

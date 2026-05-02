@@ -18,3 +18,33 @@ jobs:
 
       - run: npm ci
       - run: npx tsc -b
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      # Lance le dev server en arrière-plan, attend qu'il réponde, joue les
+      # tests, puis tue le serveur (succès ou échec).
+      - name: Run E2E
+        run: |
+          npm run dev &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID 2>/dev/null || true" EXIT
+          npx wait-on http://localhost:5173/citoyennete/ --timeout 30000
+          E2E_BASE=http://localhost:5173/citoyennete/ npm run e2e
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: /tmp/citoyennete-e2e

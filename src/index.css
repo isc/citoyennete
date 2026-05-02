@@ -120,6 +120,17 @@ button:disabled {
   margin: 24px 0;
 }
 
+.home-intro {
+  margin: 24px 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--texte-doux);
+}
+
+.home-intro strong {
+  color: var(--texte);
+}
+
 .stat-card {
   background: var(--blanc);
   border: 1px solid var(--bordure);

@@ -20,20 +20,29 @@ export function HomeScreen({ profile, onStart, onReset }: Props) {
 
   return (
     <div>
-      <div className="home-stats">
-        <div className="stat-card">
-          <div className="value">{dueCount || (introducedCount < QUESTIONS.length ? '+' : '✓')}</div>
-          <div className="label">À réviser</div>
+      {introducedCount === 0 ? (
+        <p className="home-intro">
+          Révise les notions du <strong>Livret du citoyen</strong> pour préparer
+          ton entretien de naturalisation. {QUESTIONS.length} questions, réparties
+          par thème, présentées par paquets et revues à intervalles croissants
+          au fil des séances.
+        </p>
+      ) : (
+        <div className="home-stats">
+          <div className="stat-card">
+            <div className="value">{dueCount}</div>
+            <div className="label">À réviser</div>
+          </div>
+          <div className="stat-card">
+            <div className="value">{introducedCount}<span className="value-total"> / {QUESTIONS.length}</span></div>
+            <div className="label">Vues</div>
+          </div>
+          <div className="stat-card">
+            <div className="value">{profile.currentStreak}</div>
+            <div className="label">Série (jours)</div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="value">{introducedCount}<span className="value-total"> / {QUESTIONS.length}</span></div>
-          <div className="label">Vues</div>
-        </div>
-        <div className="stat-card">
-          <div className="value">{profile.currentStreak}</div>
-          <div className="label">Série (jours)</div>
-        </div>
-      </div>
+      )}
 
       {dueCount === 0 && introducedCount === QUESTIONS.length && (
         <p className="home-message">

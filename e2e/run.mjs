@@ -127,7 +127,9 @@ async function test_bank_integrity() {
       assert(typeof q.answerIndex === 'number' && q.answerIndex >= 0 && q.answerIndex < q.choices.length,
         `answerIndex hors limites pour ${q.id} : ${q.answerIndex} / ${q.choices.length}`);
       assert(q.source && q.source.length > 0, `source vide pour ${q.id}`);
-      assert(typeof q.page === 'number' && q.page > 0, `page invalide pour ${q.id} : ${q.page}`);
+      if (q.page !== undefined) {
+        assert(typeof q.page === 'number' && q.page > 0, `page invalide pour ${q.id} : ${q.page}`);
+      }
       assert(q.category && q.category.length > 0, `catégorie vide pour ${q.id}`);
     }
     assert(errors.length === 0, `JS errors: ${errors.join(' / ')}`);

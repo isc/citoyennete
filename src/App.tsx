@@ -63,7 +63,7 @@ export function App() {
       )}
 
       <footer className="app-source">
-        Source : <a href={SOURCE_INFO.url} target="_blank" rel="noopener noreferrer">{SOURCE_INFO.title}</a> — {SOURCE_INFO.edition}, {SOURCE_INFO.publisher}.
+        Source : <a href={SOURCE_INFO.url} target="_blank" rel="noopener noreferrer">{SOURCE_INFO.title}</a> — {SOURCE_INFO.publisher}.
       </footer>
     </div>
   );

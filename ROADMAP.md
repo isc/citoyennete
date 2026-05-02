@@ -1,26 +1,61 @@
 # Roadmap
 
-Classé par impact réel pour quelqu'un qui prépare l'entretien (oral, individuel, ~15 min en préfecture).
+Le **format officiel a changé au 1er janvier 2026** : la naturalisation passe
+désormais par un **examen civique** sous forme de QCM (40 questions /
+45 min / seuil 80 % = 32/40), **en plus** de l'entretien d'assimilation oral
+en préfecture. La banque a été refondue sur la **liste officielle CR**
+(209 énoncés publics, 5 thématiques) — voir `BANK_REVIEW.md` pour les
+points à relire.
+
+L'app sert donc deux préparations :
+- **Le QCM** (épreuve éliminatoire, 80 %), couvert par la banque actuelle.
+- **L'entretien oral** en préfecture (~15 min), où il faut savoir
+  reformuler à l'oral sans choix proposés.
+
+Classé par impact réel.
 
 ## Court terme (gros levier, faible effort)
 
-1. **TTS sur les questions** — réutiliser le système Mistral Voxtral de Multiplix (`scripts/generate-tts.mjs`). L'entretien est oral, donc s'entraîner à comprendre la question prononcée vaut plus que 50 questions de plus. ~2 h.
-2. **Mode "entretien blanc"** — 10-15 questions tirées aléatoirement de toutes catégories, sans aide, sans feedback en cours, score + correction à la fin. C'est *le* parcours qui compte. ~1 h.
-3. **Filtre par catégorie sur la home** — pouvoir se concentrer sur un thème. ~30 min.
-4. **PWA installable + offline** — mêmes conditions que Multiplix, indispensable pour réviser sans réseau (transports). ~1 h.
+1. **Mode « examen blanc »** — 40 questions tirées aléatoirement (avec la
+   répartition officielle 38/40/31/33/36 ≈ proportionnelle), 45 min
+   chronométrés, score + correction à la fin, indication réussite ≥ 32/40.
+   C'est *l'épreuve* qui compte le jour J. ~1 h.
+2. **Filtre par thématique sur la home** — pouvoir se concentrer sur les
+   5 thématiques officielles (Principes et valeurs / Système institutionnel
+   et politique / Droits et devoirs / Histoire-géo-culture / Vivre dans la
+   société française). ~30 min.
+3. **TTS sur les questions** — déjà en place pour l'ancienne banque
+   (cf. `scripts/generate-tts.mjs`). À régénérer pour les 209 nouvelles.
+   Utile surtout pour la prépa de l'entretien oral. ~2 h (génération).
+4. **PWA installable + offline** — indispensable pour réviser sans réseau
+   (transports). ~1 h.
+5. **Relire BANK_REVIEW.md** — environ 10 questions ambiguës, 30-40
+   distracteurs à durcir. À faire avant tout déploiement utilisateur. ~3-4 h.
 
 ## Moyen terme (vrai contenu à produire)
 
-5. **Mode "réponse libre"** — masquer les choix, l'apprenant tape ou dit la réponse, s'auto-évalue (vert/rouge). Plus proche de l'oral réel. Tradeoff : faut une réponse "canonique" courte par question — ajout d'un champ `answerShort` dans la banque.
-6. **FALC en complément** — chaque question a sa version FALC affichable à la demande, sans remplacer le libellé officiel. ~70 reformulations à écrire à la main puis relire.
-7. **Étendre la banque à ~150 questions** — en croisant les "encadrés Q/R" du livret avec des questions remontées par des agents de préfecture (sources publiques type service-public.fr). Au passage, vérifier qu'on couvre la **Charte des droits et devoirs** signée à la naturalisation.
+6. **Mode « réponse libre »** — masquer les choix, l'apprenant tape ou dit
+   la réponse, s'auto-évalue (vert/rouge). Plus proche de l'**entretien**
+   oral (qui n'est pas un QCM). Ajouter `answerShort` dans la banque.
+7. **FALC en complément** — chaque question a sa version FALC affichable à
+   la demande, sans remplacer le libellé officiel. 209 reformulations à
+   écrire — gros chantier mais utile pour les profils B1/B2 stricts.
+8. **Mises en situation** — l'examen réel comporte 12 questions de mise en
+   situation (sur 40), confidentielles. Construire 30-50 cas pratiques
+   plausibles à partir des thèmes du livret pour s'entraîner.
 
 ## Long terme (si l'usage décolle)
 
-8. **Multilingue de l'explication** — garder le français pour la question (ce qui sera demandé), mais permettre l'explication en arabe/espagnol/anglais. Très utile pour les niveaux B1 stricts.
-9. **Compréhension orale** — au-delà du TTS sur les questions, ajouter un mode "écoute un extrait de l'entretien type, réponds" avec voix variées.
-10. **Compte / sync** — pour reprendre sur téléphone et ordi. À ne faire que si le POC trouve son public, sinon localStorage suffit.
+9. **Multilingue de l'explication** — garder le français pour la question
+   (ce qui sera demandé), mais permettre l'explication en arabe / espagnol
+   / anglais.
+10. **Compréhension orale** — au-delà du TTS sur les questions, ajouter un
+    mode « écoute un extrait de l'entretien type, réponds » avec voix
+    variées.
+11. **Compte / sync** — pour reprendre sur téléphone et ordi. À ne faire
+    que si le POC trouve son public, sinon localStorage suffit.
 
 ---
 
-**Si une seule chose maintenant : (1) TTS + (2) entretien blanc.** Les deux ensemble transforment l'app de "QCM de révision" en "simulateur de l'épreuve orale".
+**Si une seule chose maintenant : (1) examen blanc 40 Q / 45 min / 80 %.**
+Le reste est secondaire tant que ce parcours-là n'existe pas.

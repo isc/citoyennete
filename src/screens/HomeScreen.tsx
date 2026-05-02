@@ -11,8 +11,9 @@ interface Props {
 
 export function HomeScreen({ profile, onStart, onReset }: Props) {
   const today = todayISO();
-  const dueCount = profile.cards.filter((c) => c.introduced && isDue(c, today)).length;
-  const masteredCount = profile.cards.filter((c) => c.box >= 4).length;
+  const dueCount = profile.cards.filter(
+    (c) => c.introduced && c.lastSeen !== today && isDue(c, today),
+  ).length;
   const introducedCount = profile.cards.filter((c) => c.introduced).length;
 
   const categoryStats = computeCategoryStats(profile);
@@ -25,8 +26,8 @@ export function HomeScreen({ profile, onStart, onReset }: Props) {
           <div className="label">À réviser</div>
         </div>
         <div className="stat-card">
-          <div className="value">{masteredCount}</div>
-          <div className="label">Maîtrisées</div>
+          <div className="value">{introducedCount}<span className="value-total"> / {QUESTIONS.length}</span></div>
+          <div className="label">Vues</div>
         </div>
         <div className="stat-card">
           <div className="value">{profile.currentStreak}</div>
@@ -49,7 +50,7 @@ export function HomeScreen({ profile, onStart, onReset }: Props) {
           <h2>Progression par thème</h2>
           {(Object.keys(CATEGORY_LABELS) as Category[]).map((cat) => {
             const stat = categoryStats[cat];
-            const pct = stat.total === 0 ? 0 : Math.round((stat.mastered / stat.total) * 100);
+            const pct = stat.total === 0 ? 0 : Math.round((stat.progress / stat.total) * 100);
             return (
               <div key={cat} className="category-row">
                 <span className="name">{CATEGORY_LABELS[cat]}</span>
@@ -60,6 +61,9 @@ export function HomeScreen({ profile, onStart, onReset }: Props) {
               </div>
             );
           })}
+          <p className="category-progress-legend">
+            0 % = jamais vue · 100 % = boîte 5 (revue à 21 j d'écart sans erreur).
+          </p>
         </div>
       )}
 
@@ -74,16 +78,24 @@ export function HomeScreen({ profile, onStart, onReset }: Props) {
   );
 }
 
+/**
+ * Progression pondérée par boîte Leitner :
+ *   box 1 = 0 %, box 2 = 25 %, box 3 = 50 %, box 4 = 75 %, box 5 = 100 %.
+ * Une carte non encore introduite vaut 0. La somme par catégorie est ensuite
+ * normalisée par le nombre total de questions de la catégorie.
+ */
 function computeCategoryStats(profile: UserProfile) {
-  const stats = {} as Record<Category, { total: number; mastered: number }>;
+  const stats = {} as Record<Category, { total: number; progress: number }>;
   for (const cat of Object.keys(CATEGORY_LABELS) as Category[]) {
-    stats[cat] = { total: 0, mastered: 0 };
+    stats[cat] = { total: 0, progress: 0 };
   }
 
   for (const q of QUESTIONS) {
     stats[q.category].total += 1;
     const card = profile.cards.find((c) => c.questionId === q.id);
-    if (card && card.box >= 4) stats[q.category].mastered += 1;
+    if (card && card.introduced) {
+      stats[q.category].progress += (card.box - 1) / 4;
+    }
   }
 
   return stats;

@@ -325,6 +325,30 @@ async function test_double_click_choice_ignored() {
   await page.context().close();
 }
 
+async function test_audio_button_and_files() {
+  const name = 'Audio : bouton 🔊 présent + MP3 chargé pour la question';
+  const { page, errors } = await freshPage();
+  try {
+    await page.click('.home-cta');
+    await page.waitForSelector('.question-card');
+    const btn = await page.$('.audio-btn');
+    assert(btn, 'bouton audio absent');
+    // Récupère l'id de la question via la banque + son prompt visible.
+    const prompt = await page.textContent('.question-card .prompt');
+    const id = await page.evaluate(async (p) => {
+      const m = await import('/citoyennete/src/lib/questions.ts');
+      return m.QUESTIONS.find((q) => q.prompt === p)?.id;
+    }, prompt);
+    assert(id, 'id de la question introuvable');
+    const audioResp = await page.request.get(`${BASE}audio/tts/${id}.mp3`);
+    assertEq(audioResp.status(), 200, `MP3 statut pour ${id}`);
+    assert(parseInt(audioResp.headers()['content-length'] || '0', 10) > 1000, `MP3 vide pour ${id}`);
+    assert(errors.length === 0, `JS errors: ${errors.join(' / ')}`);
+    ok(name);
+  } catch (e) { fail(name, e.message); }
+  await page.context().close();
+}
+
 async function test_feedback_shows_source() {
   const name = 'Feedback : citation + référence page/section affichées';
   const { page, errors } = await freshPage();
@@ -461,6 +485,7 @@ const tests = [
   test_no_stats_before_first_session,
   test_reset_clears_state,
   test_double_click_choice_ignored,
+  test_audio_button_and_files,
   test_feedback_shows_source,
   test_footer_link,
   test_stats_match_profile,

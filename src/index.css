@@ -282,7 +282,37 @@ button:disabled {
   font-size: 19px;
   font-weight: 600;
   line-height: 1.4;
+  margin: 0;
+  flex: 1;
+}
+
+.prompt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0 0 20px;
+}
+
+.audio-btn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  background: var(--fond);
+  border: 1px solid var(--bordure);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s ease;
+}
+
+.audio-btn:hover {
+  background: var(--bordure);
+}
+
+.audio-btn:active {
+  transform: scale(0.95);
 }
 
 .choices {

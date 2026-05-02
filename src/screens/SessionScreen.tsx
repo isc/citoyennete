@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Card, SessionResult, UserProfile } from '../types';
 import { processAnswer } from '../lib/leitner';
 import { composeSession, questionFor, type SessionItem } from '../lib/sessionComposer';
@@ -22,6 +22,7 @@ export function SessionScreen({ profile, onFinish }: Props) {
   const [results, setResults] = useState<{ correct: boolean; category: Category }[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const startedAt = useRef<number>(performance.now());
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const current = items[index];
   const question = current ? questionFor(current.card) : undefined;
@@ -40,6 +41,25 @@ export function SessionScreen({ profile, onFinish }: Props) {
     startedAt.current = performance.now();
     setSelected(null);
   }, [index]);
+
+  const playAudio = useCallback(() => {
+    if (!question) return;
+    audioRef.current?.pause();
+    const audio = new Audio(`${import.meta.env.BASE_URL}audio/tts/${question.id}.mp3`);
+    audioRef.current = audio;
+    // Les navigateurs peuvent bloquer l'autoplay au tout 1er chargement.
+    // Le geste utilisateur précédent (clic sur Commencer/Suivant) le débloque
+    // en pratique. On absorbe silencieusement la rejection au cas où.
+    audio.play().catch(() => {});
+  }, [question]);
+
+  useEffect(() => {
+    playAudio();
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, [question?.id, playAudio]);
 
   if (!current || !question || !choiceOrder) {
     return (
@@ -146,7 +166,18 @@ export function SessionScreen({ profile, onFinish }: Props) {
 
       <div className="question-card">
         <span className="category-tag">{CATEGORY_LABELS[question.category]}</span>
-        <h2 className="prompt">{question.prompt}</h2>
+        <div className="prompt-row">
+          <h2 className="prompt">{question.prompt}</h2>
+          <button
+            type="button"
+            className="audio-btn"
+            onClick={playAudio}
+            aria-label="Réécouter la question"
+            title="Réécouter la question"
+          >
+            🔊
+          </button>
+        </div>
 
         <div className="choices">
           {choiceOrder.shuffled.map((text, i) => {

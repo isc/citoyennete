@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/types.ts","./src/lib/leitner.ts","./src/lib/questions.ts","./src/lib/sessioncomposer.ts","./src/lib/storage.ts","./src/lib/utils.ts","./src/screens/homescreen.tsx","./src/screens/recapscreen.tsx","./src/screens/sessionscreen.tsx"],"version":"5.9.3"}

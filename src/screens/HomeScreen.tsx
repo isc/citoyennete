@@ -75,14 +75,10 @@ export function HomeScreen({ profile, onStart, onReset }: Props) {
 }
 
 function computeCategoryStats(profile: UserProfile) {
-  const stats: Record<Category, { total: number; mastered: number }> = {
-    symboles: { total: 0, mastered: 0 },
-    institutions: { total: 0, mastered: 0 },
-    histoire: { total: 0, mastered: 0 },
-    geographie: { total: 0, mastered: 0 },
-    valeurs: { total: 0, mastered: 0 },
-    culture: { total: 0, mastered: 0 },
-  };
+  const stats = {} as Record<Category, { total: number; mastered: number }>;
+  for (const cat of Object.keys(CATEGORY_LABELS) as Category[]) {
+    stats[cat] = { total: 0, mastered: 0 };
+  }
 
   for (const q of QUESTIONS) {
     stats[q.category].total += 1;

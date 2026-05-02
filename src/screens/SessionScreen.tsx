@@ -173,6 +173,9 @@ export function SessionScreen({ profile, onFinish }: Props) {
           <div className={`feedback ${isCorrect ? 'bon' : 'mauvais'}`}>
             {isCorrect ? 'Bonne réponse.' : `Bonne réponse : ${choiceOrder.shuffled[choiceOrder.correctIndex]}.`}
             {question.explanation && <div style={{ marginTop: 6 }}>{question.explanation}</div>}
+            <div className="feedback-source">
+              Livret du citoyen, p. {question.page} — {question.source}
+            </div>
           </div>
         )}
 

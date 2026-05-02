@@ -4,6 +4,7 @@ import { loadProfile, resetProfile, saveProfile } from './lib/storage';
 import { HomeScreen } from './screens/HomeScreen';
 import { SessionScreen } from './screens/SessionScreen';
 import { RecapScreen } from './screens/RecapScreen';
+import { SOURCE_INFO } from './lib/questions';
 
 type Screen =
   | { kind: 'home' }
@@ -60,6 +61,10 @@ export function App() {
           onAgain={() => setScreen({ kind: 'session' })}
         />
       )}
+
+      <footer className="app-source">
+        Source : <a href={SOURCE_INFO.url} target="_blank" rel="noopener noreferrer">{SOURCE_INFO.title}</a> — {SOURCE_INFO.edition}, {SOURCE_INFO.publisher}.
+      </footer>
     </div>
   );
 }

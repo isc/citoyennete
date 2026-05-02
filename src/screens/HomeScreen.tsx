@@ -1,0 +1,94 @@
+import type { UserProfile } from '../types';
+import { CATEGORY_LABELS, QUESTIONS, type Category } from '../lib/questions';
+import { isDue } from '../lib/leitner';
+import { todayISO } from '../lib/utils';
+
+interface Props {
+  profile: UserProfile;
+  onStart: () => void;
+  onReset: () => void;
+}
+
+export function HomeScreen({ profile, onStart, onReset }: Props) {
+  const today = todayISO();
+  const dueCount = profile.cards.filter((c) => c.introduced && isDue(c, today)).length;
+  const masteredCount = profile.cards.filter((c) => c.box >= 4).length;
+  const introducedCount = profile.cards.filter((c) => c.introduced).length;
+
+  const categoryStats = computeCategoryStats(profile);
+
+  return (
+    <div>
+      <div className="home-stats">
+        <div className="stat-card">
+          <div className="value">{dueCount || (introducedCount < QUESTIONS.length ? '+' : '✓')}</div>
+          <div className="label">À réviser</div>
+        </div>
+        <div className="stat-card">
+          <div className="value">{masteredCount}</div>
+          <div className="label">Maîtrisées</div>
+        </div>
+        <div className="stat-card">
+          <div className="value">{profile.currentStreak}</div>
+          <div className="label">Série (jours)</div>
+        </div>
+      </div>
+
+      {dueCount === 0 && introducedCount === QUESTIONS.length && (
+        <p className="home-message">
+          Bravo, plus rien d'urgent à réviser ! Reviens demain ou lance une séance bonus.
+        </p>
+      )}
+
+      <button className="btn btn-primary home-cta" onClick={onStart}>
+        {introducedCount === 0 ? 'Commencer' : 'Lancer une séance'}
+      </button>
+
+      {introducedCount > 0 && (
+        <div className="category-progress">
+          <h2>Progression par thème</h2>
+          {(Object.keys(CATEGORY_LABELS) as Category[]).map((cat) => {
+            const stat = categoryStats[cat];
+            const pct = stat.total === 0 ? 0 : Math.round((stat.mastered / stat.total) * 100);
+            return (
+              <div key={cat} className="category-row">
+                <span className="name">{CATEGORY_LABELS[cat]}</span>
+                <div className="bar">
+                  <div style={{ width: `${pct}%` }} />
+                </div>
+                <span className="pct">{pct}%</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {introducedCount > 0 && (
+        <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <button className="btn btn-ghost" onClick={onReset}>
+            Réinitialiser ma progression
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function computeCategoryStats(profile: UserProfile) {
+  const stats: Record<Category, { total: number; mastered: number }> = {
+    symboles: { total: 0, mastered: 0 },
+    institutions: { total: 0, mastered: 0 },
+    histoire: { total: 0, mastered: 0 },
+    geographie: { total: 0, mastered: 0 },
+    valeurs: { total: 0, mastered: 0 },
+    culture: { total: 0, mastered: 0 },
+  };
+
+  for (const q of QUESTIONS) {
+    stats[q.category].total += 1;
+    const card = profile.cards.find((c) => c.questionId === q.id);
+    if (card && card.box >= 4) stats[q.category].mastered += 1;
+  }
+
+  return stats;
+}

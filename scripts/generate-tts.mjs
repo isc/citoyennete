@@ -35,32 +35,52 @@ if (!API_KEY) {
   process.exit(1);
 }
 
+/**
+ * Tente jusqu'à 4 fois avec backoff exponentiel (1s, 2s, 4s) pour absorber
+ * les coupures réseau (ECONNRESET) et les throttling API (429).
+ */
 async function generateAudio(text, outputPath) {
-  const response = await fetch(MISTRAL_TTS_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      input: text,
-      voice_id: VOICE_ID,
-      response_format: 'mp3',
-    }),
-  });
-  if (!response.ok) {
-    const body = await response.text();
-    console.error(`API error: ${response.status} - ${body}`);
-    return false;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      const response = await fetch(MISTRAL_TTS_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          input: text,
+          voice_id: VOICE_ID,
+          response_format: 'mp3',
+        }),
+      });
+      if (response.status === 429 || response.status >= 500) {
+        throw new Error(`API ${response.status}`);
+      }
+      if (!response.ok) {
+        const body = await response.text();
+        console.error(`API error: ${response.status} - ${body}`);
+        return false;
+      }
+      const data = await response.json();
+      if (!data.audio_data) {
+        console.error('No audio_data in response');
+        return false;
+      }
+      await writeFile(outputPath, Buffer.from(data.audio_data, 'base64'));
+      return true;
+    } catch (err) {
+      if (attempt === 4) {
+        console.error(`giving up after 4 attempts: ${err.message}`);
+        return false;
+      }
+      const wait = 2 ** (attempt - 1) * 1000;
+      process.stdout.write(`(retry in ${wait}ms after ${err.message}) `);
+      await new Promise((r) => setTimeout(r, wait));
+    }
   }
-  const data = await response.json();
-  if (!data.audio_data) {
-    console.error('No audio_data in response');
-    return false;
-  }
-  await writeFile(outputPath, Buffer.from(data.audio_data, 'base64'));
-  return true;
+  return false;
 }
 
 /**

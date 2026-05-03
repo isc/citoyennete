@@ -20,10 +20,11 @@ export function HomeScreen({ profile, onStart, onReset }: Props) {
     <div>
       {introducedCount === 0 ? (
         <p className="home-intro">
-          Révise les notions du <strong>Livret du citoyen</strong> pour préparer
-          ton entretien de naturalisation. {QUESTIONS.length} questions, réparties
-          par thème, présentées par paquets et revues à intervalles croissants
-          au fil des séances.
+          Révise les énoncés officiels de l'<strong>examen civique</strong>
+          (mention « carte de résident » / naturalisation), publiés par le
+          ministère de l'Intérieur. {QUESTIONS.length} questions, réparties par
+          thème, présentées par paquets et revues à intervalles croissants au
+          fil des séances.
         </p>
       ) : (
         <div className="home-stats">

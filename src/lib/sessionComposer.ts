@@ -1,6 +1,6 @@
 import type { Card } from '../types';
 import { needsReview, shouldIntroduceNew } from './leitner';
-import { QUESTIONS } from './questions';
+import { QUESTIONS, questionLevels, type ExamLevel } from './questions';
 import { shuffle } from './utils';
 
 export interface SessionItem {
@@ -12,6 +12,17 @@ const SESSION_LENGTH = 10;
 const MAX_NEW_PER_SESSION = 5;
 
 /**
+ * Restreint les cartes à celles dont la question apparaît dans la liste
+ * officielle du niveau visé (CSP ou CR).
+ */
+export function cardsForLevel(cards: Card[], level: ExamLevel): Card[] {
+  const allowedIds = new Set(
+    QUESTIONS.filter((q) => questionLevels(q).includes(level)).map((q) => q.id),
+  );
+  return cards.filter((c) => allowedIds.has(c.questionId));
+}
+
+/**
  * Compose une séance :
  * - cartes à revoir aujourd'hui (boîte basse en priorité, pour retravailler
  *   ce qu'on maîtrise le moins) — y compris les fautes du jour, qu'on doit
@@ -21,11 +32,15 @@ const MAX_NEW_PER_SESSION = 5;
  *   d'autre à faire (cas des toutes premières séances)
  * - cap à SESSION_LENGTH cartes
  *
+ * Le pool de cartes est restreint en amont aux questions du niveau choisi.
+ *
  * Une carte correctement répondue aujourd'hui n'est pas re-poussée le même
  * jour (cf. needsReview), pour préserver l'espacement de la répétition.
  */
-export function composeSession(cards: Card[], today: string): SessionItem[] {
-  const dueCards = cards
+export function composeSession(cards: Card[], today: string, level: ExamLevel): SessionItem[] {
+  const pool = cardsForLevel(cards, level);
+
+  const dueCards = pool
     .filter((c) => needsReview(c, today))
     .sort((a, b) => a.box - b.box);
 
@@ -34,9 +49,9 @@ export function composeSession(cards: Card[], today: string): SessionItem[] {
     isIntroduction: false,
   }));
 
-  const allowIntro = items.length === 0 || shouldIntroduceNew(cards);
+  const allowIntro = items.length === 0 || shouldIntroduceNew(pool);
   if (allowIntro) {
-    const newCardPool = cards.filter((c) => !c.introduced);
+    const newCardPool = pool.filter((c) => !c.introduced);
     const cap = Math.min(
       MAX_NEW_PER_SESSION,
       SESSION_LENGTH - items.length,

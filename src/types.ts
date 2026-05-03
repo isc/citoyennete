@@ -1,4 +1,4 @@
-import type { Category } from './lib/questions';
+import type { Category, ExamLevel } from './lib/questions';
 
 export type BoxLevel = 1 | 2 | 3 | 4 | 5;
 
@@ -34,6 +34,8 @@ export interface SessionResult {
 
 export interface UserProfile {
   startDate: string;
+  /** Niveau d'examen visé. `null` tant que l'utilisateur n'a pas choisi. */
+  examLevel: ExamLevel | null;
   cards: Card[];
   totalSessions: number;
   currentStreak: number;

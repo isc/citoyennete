@@ -3,14 +3,23 @@
 Le **format officiel a changé au 1er janvier 2026** : la naturalisation passe
 désormais par un **examen civique** sous forme de QCM (40 questions /
 45 min / seuil 80 % = 32/40), **en plus** de l'entretien d'assimilation oral
-en préfecture. La banque a été refondue sur la **liste officielle CR**
-(209 énoncés publics, 5 thématiques) — voir `BANK_REVIEW.md` pour les
-points à relire.
+en préfecture. La même mécanique d'examen civique est exigée pour obtenir
+une carte de séjour pluriannuelle (CSP, niveau A2) ou la carte de résident
+/ naturalisation (CR, niveau B2).
+
+La banque agrège **les deux listes officielles publiques** (368 questions
+au total : 209 CR + 159 CSP-only + 32 communes), avec choix et réponses
+rédigés à partir des sources publiques (Livret du citoyen, Constitution,
+Codes, service-public.fr) — voir `BANK_REVIEW.md` pour les points à relire.
+
+L'utilisateur choisit son niveau au démarrage via un **onboarding FALC**
+(2 cartes, langage simple, explication à la demande), modifiable depuis la
+home. Les séances sont filtrées sur les questions du niveau choisi.
 
 L'app sert donc deux préparations :
 - **Le QCM** (épreuve éliminatoire, 80 %), couvert par la banque actuelle.
-- **L'entretien oral** en préfecture (~15 min), où il faut savoir
-  reformuler à l'oral sans choix proposés.
+- **L'entretien oral** en préfecture (~15 min, naturalisation uniquement),
+  où il faut savoir reformuler à l'oral sans choix proposés.
 
 Classé par impact réel.
 

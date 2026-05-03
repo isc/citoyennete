@@ -16,7 +16,9 @@ interface ChoiceOrder {
 }
 
 export function SessionScreen({ profile, onFinish }: Props) {
-  const [items] = useState<SessionItem[]>(() => composeSession(profile.cards, todayISO()));
+  const [items] = useState<SessionItem[]>(() =>
+    composeSession(profile.cards, todayISO(), profile.examLevel ?? 'cr'),
+  );
   const [index, setIndex] = useState(0);
   const [cards, setCards] = useState<Card[]>(profile.cards);
   const [results, setResults] = useState<{ correct: boolean; category: Category }[]>([]);

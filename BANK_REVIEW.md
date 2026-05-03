@@ -1,9 +1,16 @@
 # Banque officielle — points à relire
 
-La banque a été refondue à partir de la **liste officielle des 209 questions
-de connaissance** publiée par le ministère de l'Intérieur pour l'examen
-civique CR (naturalisation), sur
-[formation-civique.interieur.gouv.fr](https://formation-civique.interieur.gouv.fr/examen-civique/liste-officielle-des-questions-de-connaissance-cr/).
+La banque agrège les **deux listes officielles** publiées par le ministère
+de l'Intérieur sur formation-civique.interieur.gouv.fr :
+
+- **CR** (carte de résident / naturalisation, niveau B2) — 209 énoncés
+  ([liste](https://formation-civique.interieur.gouv.fr/examen-civique/liste-officielle-des-questions-de-connaissance-cr/))
+- **CSP** (carte de séjour pluriannuelle, niveau A2) — 191 énoncés
+  ([liste](https://formation-civique.interieur.gouv.fr/examen-civique/liste-officielle-des-questions-de-connaissance-csp/))
+
+32 énoncés sont communs aux deux listes (taggés `levels: ['csp', 'cr']`),
+177 sont CR-only (`['cr']` ou implicite) et 159 sont CSP-only (`['csp']`).
+Total = **368 questions**.
 
 Les **énoncés sont repris à l'identique**. En revanche les **4 choix de
 réponse et la bonne réponse** ne sont pas publiés par le ministère —
@@ -28,6 +35,10 @@ mériterait d'être vérifiée avant de servir à de vrais candidats.
 | `h-4h1l3` | Population approximative de la France en 2025 | « 68 millions » | Chiffre INSEE 2024 : 68,4 M. Le chiffre exact évolue chaque année. |
 | `h-5m782` | Combien de personnes parlent français dans le monde ? | « ~320 millions » | Selon OIF 2022. Le ministère pourrait retenir un autre chiffre rond. |
 | `s-5dupn` | Condition pour passer le permis de conduire | « Au moins 17 ans + Code réussi » | Depuis 2024 le minimum est 17 ans pour le permis B. La conduite supervisée commence à 15 ans. |
+| `cs-3lec9` | À partir de quel âge un mineur peut-il travailler ? | `16 ans` | Règle générale 16 ans, dérogation possible dès 14 ans pour des travaux légers en vacances scolaires. |
+| `cp-5f447` | Rôle des associations | « Permettre aux citoyens de s'engager pour une cause » | Plusieurs formulations possibles selon le corrigé attendu. |
+| `ch-cau0p` | Qui était Joséphine Baker ? | « Artiste de music-hall et résistante, naturalisée française » | Formulation longue à confronter au corrigé. |
+| `ch-7dk59` | Quel fleuve coule en France ? | `La Loire` | Plusieurs réponses possibles (Seine, Rhône, Garonne) ; le distracteur évite l'ambiguïté en proposant des fleuves étrangers. |
 
 ---
 

@@ -3,6 +3,7 @@ import type { Card, SessionResult, UserProfile } from '../types';
 import { processAnswer } from '../lib/leitner';
 import { composeSession, questionFor, type SessionItem } from '../lib/sessionComposer';
 import { CATEGORY_LABELS, type Category } from '../lib/questions';
+import { falcPromptFor, loadFalcMode, saveFalcMode } from '../lib/falc';
 import { todayISO, shuffle } from '../lib/utils';
 
 interface Props {
@@ -23,11 +24,15 @@ export function SessionScreen({ profile, onFinish }: Props) {
   const [cards, setCards] = useState<Card[]>(profile.cards);
   const [results, setResults] = useState<{ correct: boolean; category: Category }[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+  // Préférence d'accessibilité : une fois activée, la version simplifiée
+  // s'affiche d'office sur les questions suivantes et aux prochaines séances.
+  const [falcMode, setFalcMode] = useState<boolean>(() => loadFalcMode());
   const startedAt = useRef<number>(performance.now());
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const current = items[index];
   const question = current ? questionFor(current.card) : undefined;
+  const falcPrompt = question ? falcPromptFor(question.id) : undefined;
 
   const choiceOrder = useMemo<ChoiceOrder | null>(() => {
     if (!question) return null;
@@ -75,6 +80,13 @@ export function SessionScreen({ profile, onFinish }: Props) {
   function handleSelect(choiceIdx: number) {
     if (selected !== null) return;
     setSelected(choiceIdx);
+  }
+
+  function toggleFalc() {
+    setFalcMode((on) => {
+      saveFalcMode(!on);
+      return !on;
+    });
   }
 
   function handleNext() {
@@ -180,6 +192,28 @@ export function SessionScreen({ profile, onFinish }: Props) {
             🔊
           </button>
         </div>
+
+        {/* L'énoncé officiel reste toujours affiché au-dessus : la version
+            simplifiée l'éclaire, elle ne le remplace pas. */}
+        {falcPrompt && (
+          <div className="falc-block">
+            <button
+              type="button"
+              className="falc-toggle"
+              onClick={toggleFalc}
+              aria-expanded={falcMode}
+              aria-controls={`falc-${question.id}`}
+              title="Facile À Lire et à Comprendre"
+            >
+              {falcMode ? 'Masquer la version simplifiée' : 'Version simplifiée'}
+            </button>
+            {falcMode && (
+              <p className="falc-text" id={`falc-${question.id}`}>
+                {falcPrompt}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="choices">
           {choiceOrder.shuffled.map((text, i) => {

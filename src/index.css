@@ -315,6 +315,28 @@ button:disabled {
   transform: scale(0.95);
 }
 
+/* Version FALC (« Facile À Lire et à Comprendre ») de l'énoncé */
+
+.falc-block {
+  margin: -8px 0 20px;
+}
+
+/* Se compose avec .link-btn : seul le retrait diffère, pour aligner le
+   bouton sur l'énoncé. */
+.falc-toggle {
+  padding: 0;
+}
+
+.falc-text {
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  background: rgba(0, 85, 164, 0.06);
+  border-left: 3px solid var(--bleu);
+  border-radius: 0 8px 8px 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
 .choices {
   display: flex;
   flex-direction: column;

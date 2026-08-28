@@ -46,9 +46,13 @@ Classé par impact réel.
 6. **Mode « réponse libre »** — masquer les choix, l'apprenant tape ou dit
    la réponse, s'auto-évalue (vert/rouge). Plus proche de l'**entretien**
    oral (qui n'est pas un QCM). Ajouter `answerShort` dans la banque.
-7. **FALC en complément** — chaque question a sa version FALC affichable à
-   la demande, sans remplacer le libellé officiel. 209 reformulations à
-   écrire — gros chantier mais utile pour les profils B1/B2 stricts.
+7. ~~**FALC en complément**~~ — ✅ fait. Bouton « Version simplifiée » sous
+   l'énoncé, préférence mémorisée, énoncé officiel toujours affiché.
+   199 des 368 énoncés ont une version FALC ; les 169 autres ont été jugés
+   déjà assez simples pour qu'une paraphrase n'apporte rien.
+   **Reste à faire : la relecture** — cf. `FALC_REVIEW.md`. La norme FALC
+   exige une validation par des personnes concernées ; le jet actuel n'est
+   pas validé.
 8. **Mises en situation** — l'examen réel comporte 12 questions de mise en
    situation (sur 40), confidentielles. Construire 30-50 cas pratiques
    plausibles à partir des thèmes du livret pour s'entraîner.

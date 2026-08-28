@@ -27,7 +27,8 @@ export function SessionScreen({ profile, onFinish }: Props) {
   // Préférence d'accessibilité : une fois activée, la version simplifiée
   // s'affiche d'office sur les questions suivantes et aux prochaines séances.
   const [falcMode, setFalcMode] = useState<boolean>(() => loadFalcMode());
-  const startedAt = useRef<number>(performance.now());
+  // Renseigné par l'effet ci-dessous dès le montage, avant tout clic possible.
+  const startedAt = useRef<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const current = items[index];
@@ -46,7 +47,6 @@ export function SessionScreen({ profile, onFinish }: Props) {
 
   useEffect(() => {
     startedAt.current = performance.now();
-    setSelected(null);
   }, [index]);
 
   const playAudio = useCallback(() => {
@@ -90,6 +90,10 @@ export function SessionScreen({ profile, onFinish }: Props) {
 
   function handleNext() {
     if (selected === null || !current || !question || !choiceOrder) return;
+    // `handleNext` est un gestionnaire d'événement, jamais appelé pendant le
+    // rendu : y mesurer le temps de réponse est correct. La règle ne sait pas
+    // distinguer une fonction déclarée dans le corps du composant.
+    // eslint-disable-next-line react-hooks/purity
     const elapsed = performance.now() - startedAt.current;
     const correct = selected === choiceOrder.correctIndex;
     const now = todayISO();
@@ -110,6 +114,7 @@ export function SessionScreen({ profile, onFinish }: Props) {
       finishSession(newCards, [...results, { correct, category: question.category }]);
     } else {
       setIndex(index + 1);
+      setSelected(null);
     }
   }
 

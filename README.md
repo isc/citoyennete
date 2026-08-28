@@ -80,7 +80,7 @@ npm run dev      # serveur de dev sur http://localhost:5173/citoyennete/
 | `npm run build` | `tsc -b` puis build de production dans `dist/` |
 | `npm run preview` | Sert le build de production |
 | `npm run e2e` | Suite end-to-end Playwright |
-| `npm run lint` | ESLint |
+| `npm run lint` | ESLint (config plate dans `eslint.config.js`) |
 
 ### Tests end-to-end
 
@@ -90,11 +90,11 @@ a besoin du serveur de dev **lancé à part** :
 
 ```bash
 npm run dev &
-E2E_BASE=http://localhost:5173/citoyennete/ npm run e2e
+npm run e2e
 ```
 
-`E2E_BASE` est nécessaire ici : le script vise `localhost:5174` par défaut,
-alors que Vite sert sur 5173 (c'est aussi ce que fait la CI).
+Si le serveur écoute ailleurs, surcharge l'adresse :
+`E2E_BASE=http://localhost:4000/citoyennete/ npm run e2e`.
 
 Les tests s'exécutent tous même en cas d'échec — le récapitulatif final liste
 ce qui a cassé, et les captures partent dans `/tmp/citoyennete-e2e`.
@@ -143,7 +143,7 @@ comme nouvelles, celles retirées disparaissent.
 
 ## Déploiement
 
-Chaque push sur `main` déclenche la CI (typecheck + e2e) puis publie `dist/`
+Chaque push sur `main` déclenche la CI (lint + typecheck, puis e2e) et publie `dist/`
 sur la branche `gh-pages`. Le chemin de base est `/citoyennete/`, surchargeable
 à la construction via `VITE_BASE_PATH`.
 

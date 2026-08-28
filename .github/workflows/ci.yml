@@ -17,6 +17,7 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm run lint
       - run: npx tsc -b
 
   e2e:
@@ -40,7 +41,7 @@ jobs:
           SERVER_PID=$!
           trap "kill $SERVER_PID 2>/dev/null || true" EXIT
           npx wait-on http://localhost:5173/citoyennete/ --timeout 30000
-          E2E_BASE=http://localhost:5173/citoyennete/ npm run e2e
+          npm run e2e
 
       - name: Upload screenshots on failure
         if: failure()

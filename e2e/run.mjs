@@ -1,5 +1,6 @@
 // Suite E2E. Exécute via `npm run e2e` (lance le dev server à part avec
-// `npm run dev`). Surcharge le port avec `E2E_BASE=http://host:port/citoyennete/`.
+// `npm run dev`, qui sert sur le port 5173 par défaut). Surcharge l'adresse
+// avec `E2E_BASE=http://host:port/citoyennete/`.
 //
 // Chaque test prend une page neuve, vide localStorage, exerce un parcours
 // et vérifie l'état attendu (DOM + profil persisté). Les échecs sont
@@ -8,7 +9,7 @@
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
 
-const BASE = process.env.E2E_BASE ?? 'http://localhost:5174/citoyennete/';
+const BASE = process.env.E2E_BASE ?? 'http://localhost:5173/citoyennete/';
 const SHOTS_DIR = process.env.E2E_SHOTS ?? '/tmp/citoyennete-e2e';
 mkdirSync(SHOTS_DIR, { recursive: true });
 

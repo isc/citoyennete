@@ -321,19 +321,10 @@ button:disabled {
   margin: -8px 0 20px;
 }
 
+/* Se compose avec .link-btn : seul le retrait diffère, pour aligner le
+   bouton sur l'énoncé. */
 .falc-toggle {
-  background: none;
-  border: none;
   padding: 0;
-  font: inherit;
-  font-size: 13px;
-  color: var(--bleu);
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.falc-toggle:hover {
-  color: var(--rouge);
 }
 
 .falc-text {
@@ -487,9 +478,9 @@ button:disabled {
   text-decoration: underline;
 }
 
-/* ────────────────────────────────────────────────────
+/* ────────────────────────────────────────────────────────────
    Onboarding (choix CSP / CR)
-   ──────────────────────────────────────────────────── */
+   ──────────────────────────────────────────────────────────── */
 
 .onboarding {
   padding: 12px 0 24px;

@@ -13,8 +13,7 @@ import { FALC_PROMPTS } from './falcPrompts';
  * bouton.
  */
 export function falcPromptFor(questionId: string): string | undefined {
-  const text = FALC_PROMPTS[questionId];
-  return text && text.length > 0 ? text : undefined;
+  return FALC_PROMPTS[questionId] || undefined;
 }
 
 export function hasFalcPrompt(questionId: string): boolean {

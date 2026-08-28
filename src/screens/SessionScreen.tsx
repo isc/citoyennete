@@ -83,10 +83,9 @@ export function SessionScreen({ profile, onFinish }: Props) {
   }
 
   function toggleFalc() {
-    setFalcMode((on) => {
-      saveFalcMode(!on);
-      return !on;
-    });
+    const next = !falcMode;
+    setFalcMode(next);
+    saveFalcMode(next);
   }
 
   function handleNext() {
@@ -199,7 +198,7 @@ export function SessionScreen({ profile, onFinish }: Props) {
           <div className="falc-block">
             <button
               type="button"
-              className="falc-toggle"
+              className="link-btn falc-toggle"
               onClick={toggleFalc}
               aria-expanded={falcMode}
               aria-controls={`falc-${question.id}`}

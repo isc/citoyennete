@@ -118,9 +118,9 @@ async function playSession(page, mode) {
   return seenPrompts;
 }
 
-// ───────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 // Tests
-// ───────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 
 async function test_bank_integrity() {
   const name = 'Banque : chaque question est valide (choix, answerIndex, source)';
@@ -416,26 +416,20 @@ async function test_feedback_shows_source() {
  */
 async function seedDueQuestions(page, ids) {
   await page.evaluate(async ({ ids }) => {
-    const mod = await import('/citoyennete/src/lib/questions.ts');
+    const storage = await import('/citoyennete/src/lib/storage.ts');
     const due = new Set(ids);
-    const profile = {
-      startDate: '2020-01-01',
+    const fresh = storage.createNewProfile();
+    storage.saveProfile({
+      ...fresh,
       examLevel: 'cr',
-      cards: mod.QUESTIONS.map((q) => ({
-        questionId: q.id,
+      cards: fresh.cards.map((c) => ({
+        ...c,
         box: 2,
         lastSeen: '2020-01-01',
-        nextDue: due.has(q.id) ? '2020-01-01' : '2099-01-01',
-        history: [],
+        nextDue: due.has(c.questionId) ? '2020-01-01' : '2099-01-01',
         introduced: true,
       })),
-      totalSessions: 1,
-      currentStreak: 1,
-      longestStreak: 1,
-      lastSessionDate: '2020-01-01',
-      sessionHistory: [],
-    };
-    localStorage.setItem('citoyennete-profile', JSON.stringify(profile));
+    });
   }, { ids });
   await page.reload({ waitUntil: 'networkidle' });
 }
@@ -444,11 +438,11 @@ async function falcIdsForLevel(page, level, limit) {
   return page.evaluate(async ({ level, limit }) => {
     const [bank, falc] = await Promise.all([
       import('/citoyennete/src/lib/questions.ts'),
-      import('/citoyennete/src/lib/falcPrompts.ts'),
+      import('/citoyennete/src/lib/falc.ts'),
     ]);
     return bank.QUESTIONS
-      .filter((q) => (q.levels ?? ['cr']).includes(level))
-      .filter((q) => (falc.FALC_PROMPTS[q.id] ?? '').length > 0)
+      .filter((q) => bank.questionLevels(q).includes(level))
+      .filter((q) => falc.hasFalcPrompt(q.id))
       .slice(0, limit)
       .map((q) => q.id);
   }, { level, limit });
@@ -456,7 +450,7 @@ async function falcIdsForLevel(page, level, limit) {
 
 async function test_falc_data_integrity() {
   const name = 'FALC : chaque reformulation cible une question connue et diffère de l\'énoncé';
-  const { page, errors } = await freshPage();
+  const { page, errors } = await freshPage(undefined, { skipOnboarding: true });
   try {
     const report = await page.evaluate(async () => {
       const [bank, falc] = await Promise.all([
@@ -492,7 +486,7 @@ async function test_falc_data_integrity() {
 
 async function test_falc_toggle_and_persistence() {
   const name = 'FALC : bouton affiche la version simplifiée sans masquer l\'énoncé, et la préférence persiste';
-  const { page, errors } = await freshPage();
+  const { page, errors } = await freshPage(undefined, { skipOnboarding: true });
   try {
     const ids = await falcIdsForLevel(page, 'cr', 3);
     assert(ids.length >= 2, `pas assez de questions FALC pour le test : ${ids.length}`);
@@ -524,9 +518,10 @@ async function test_falc_toggle_and_persistence() {
     await answerCurrentQuestion(page, { correct: true });
     await page.click('.session-actions .btn-primary');
     await page.waitForTimeout(150);
-    if (await page.$('.falc-toggle')) {
-      assert(await page.$('.falc-text'), 'la préférence FALC doit rester active sur la question suivante');
-    }
+    // Les 3 questions semées ont toutes une version FALC : le bouton doit
+    // être là, et déjà déplié puisque la préférence est active.
+    assert(await page.$('.falc-toggle'), 'la question suivante doit proposer une version FALC');
+    assert(await page.$('.falc-text'), 'la préférence FALC doit rester active sur la question suivante');
 
     // …et survit à un rechargement.
     await page.reload({ waitUntil: 'networkidle' });
@@ -654,7 +649,7 @@ async function test_screenshots() {
   ok(name);
 }
 
-// ───────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 
 const tests = [
   test_bank_integrity,

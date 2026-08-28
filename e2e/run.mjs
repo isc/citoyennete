@@ -118,9 +118,9 @@ async function playSession(page, mode) {
   return seenPrompts;
 }
 
-// ──────────────────────────────────────────────────────────────────────
+// ───────────────────────────────────────────────────────────────
 // Tests
-// ──────────────────────────────────────────────────────────────────────
+// ───────────────────────────────────────────────────────────────
 
 async function test_bank_integrity() {
   const name = 'Banque : chaque question est valide (choix, answerIndex, source)';
@@ -409,6 +409,136 @@ async function test_feedback_shows_source() {
   await page.context().close();
 }
 
+/**
+ * Prépare un profil où seules les questions `ids` sont dues aujourd'hui :
+ * toutes les cartes sont introduites (donc aucune nouveauté n'est ajoutée)
+ * et seules celles ciblées ont une échéance passée.
+ */
+async function seedDueQuestions(page, ids) {
+  await page.evaluate(async ({ ids }) => {
+    const mod = await import('/citoyennete/src/lib/questions.ts');
+    const due = new Set(ids);
+    const profile = {
+      startDate: '2020-01-01',
+      examLevel: 'cr',
+      cards: mod.QUESTIONS.map((q) => ({
+        questionId: q.id,
+        box: 2,
+        lastSeen: '2020-01-01',
+        nextDue: due.has(q.id) ? '2020-01-01' : '2099-01-01',
+        history: [],
+        introduced: true,
+      })),
+      totalSessions: 1,
+      currentStreak: 1,
+      longestStreak: 1,
+      lastSessionDate: '2020-01-01',
+      sessionHistory: [],
+    };
+    localStorage.setItem('citoyennete-profile', JSON.stringify(profile));
+  }, { ids });
+  await page.reload({ waitUntil: 'networkidle' });
+}
+
+async function falcIdsForLevel(page, level, limit) {
+  return page.evaluate(async ({ level, limit }) => {
+    const [bank, falc] = await Promise.all([
+      import('/citoyennete/src/lib/questions.ts'),
+      import('/citoyennete/src/lib/falcPrompts.ts'),
+    ]);
+    return bank.QUESTIONS
+      .filter((q) => (q.levels ?? ['cr']).includes(level))
+      .filter((q) => (falc.FALC_PROMPTS[q.id] ?? '').length > 0)
+      .slice(0, limit)
+      .map((q) => q.id);
+  }, { level, limit });
+}
+
+async function test_falc_data_integrity() {
+  const name = 'FALC : chaque reformulation cible une question connue et diffère de l\'énoncé';
+  const { page, errors } = await freshPage();
+  try {
+    const report = await page.evaluate(async () => {
+      const [bank, falc] = await Promise.all([
+        import('/citoyennete/src/lib/questions.ts'),
+        import('/citoyennete/src/lib/falcPrompts.ts'),
+      ]);
+      const byId = new Map(bank.QUESTIONS.map((q) => [q.id, q]));
+      const norm = (s) => s.replace(/[\s'’]/g, '').toLowerCase();
+      const unknown = [];
+      const identical = [];
+      const empty = [];
+      for (const [id, text] of Object.entries(falc.FALC_PROMPTS)) {
+        const q = byId.get(id);
+        if (!q) { unknown.push(id); continue; }
+        if (!text || !text.trim()) { empty.push(id); continue; }
+        if (norm(text) === norm(q.prompt)) identical.push(id);
+      }
+      return {
+        unknown, identical, empty,
+        count: Object.keys(falc.FALC_PROMPTS).length,
+        total: bank.QUESTIONS.length,
+      };
+    });
+    assertEq(report.unknown.length, 0, `ids FALC inconnus : ${report.unknown.slice(0, 5).join(', ')}`);
+    assertEq(report.empty.length, 0, `entrées FALC vides : ${report.empty.slice(0, 5).join(', ')}`);
+    assertEq(report.identical.length, 0, `FALC identique à l'énoncé : ${report.identical.slice(0, 5).join(', ')}`);
+    assert(report.count > 0, 'aucune reformulation FALC dans la banque');
+    assert(errors.length === 0, `JS errors: ${errors.join(' / ')}`);
+    ok(`${name} (${report.count} / ${report.total})`);
+  } catch (e) { fail(name, e.message); }
+  await page.context().close();
+}
+
+async function test_falc_toggle_and_persistence() {
+  const name = 'FALC : bouton affiche la version simplifiée sans masquer l\'énoncé, et la préférence persiste';
+  const { page, errors } = await freshPage();
+  try {
+    const ids = await falcIdsForLevel(page, 'cr', 3);
+    assert(ids.length >= 2, `pas assez de questions FALC pour le test : ${ids.length}`);
+    await seedDueQuestions(page, ids);
+
+    await page.click('.home-cta');
+    await page.waitForSelector('.question-card');
+
+    // Replié par défaut : le bouton est là, le texte simplifié non.
+    await page.waitForSelector('.falc-toggle');
+    assert(!(await page.$('.falc-text')), 'la version simplifiée ne doit pas être dépliée par défaut');
+    assertEq(
+      await page.getAttribute('.falc-toggle', 'aria-expanded'), 'false',
+      'aria-expanded initial',
+    );
+
+    const officialBefore = (await page.textContent('.prompt')).trim();
+    await page.click('.falc-toggle');
+    await page.waitForSelector('.falc-text');
+
+    const falcText = (await page.textContent('.falc-text')).trim();
+    const officialAfter = (await page.textContent('.prompt')).trim();
+    assert(falcText.length > 0, 'version simplifiée vide');
+    assert(falcText !== officialAfter, 'la version simplifiée est identique à l\'énoncé');
+    assertEq(officialAfter, officialBefore, 'l\'énoncé officiel doit rester affiché à l\'identique');
+    assertEq(await page.getAttribute('.falc-toggle', 'aria-expanded'), 'true', 'aria-expanded après ouverture');
+
+    // La préférence suit d'une question à l'autre.
+    await answerCurrentQuestion(page, { correct: true });
+    await page.click('.session-actions .btn-primary');
+    await page.waitForTimeout(150);
+    if (await page.$('.falc-toggle')) {
+      assert(await page.$('.falc-text'), 'la préférence FALC doit rester active sur la question suivante');
+    }
+
+    // …et survit à un rechargement.
+    await page.reload({ waitUntil: 'networkidle' });
+    const stored = await page.evaluate(() => localStorage.getItem('citoyennete-falc'));
+    assertEq(stored, '1', 'préférence FALC persistée');
+
+    assert(errors.length === 0, `JS errors: ${errors.join(' / ')}`);
+    ok(name);
+  } catch (e) { fail(name, e.message); }
+  await page.context().close();
+}
+
 async function test_footer_link() {
   const name = 'Footer : liens vers les listes officielles CSP et CR présents';
   const { page, errors } = await freshPage();
@@ -524,7 +654,7 @@ async function test_screenshots() {
   ok(name);
 }
 
-// ──────────────────────────────────────────────────────────────────────
+// ───────────────────────────────────────────────────────────────
 
 const tests = [
   test_bank_integrity,
@@ -540,6 +670,8 @@ const tests = [
   test_double_click_choice_ignored,
   test_audio_button_and_files,
   test_feedback_shows_source,
+  test_falc_data_integrity,
+  test_falc_toggle_and_persistence,
   test_footer_link,
   test_stats_match_profile,
   test_streak_multi_day,
